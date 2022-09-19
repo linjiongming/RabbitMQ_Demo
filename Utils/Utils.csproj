@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{954EA1CC-2780-4DCD-8995-A63D0C854721}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Utils</RootNamespace>
+    <AssemblyName>Utils</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.Client, Version=6.0.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\RabbitMQ.Client.6.4.0\lib\net461\RabbitMQ.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ConsoleTraceListener.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RabbitMQ.Client\Consts\ArgumentKeys.cs" />
+    <Compile Include="RabbitMQ.Client\Consts\ExchangeTypes.cs" />
+    <Compile Include="RabbitMQ.Client\Consts\QueueTypes.cs" />
+    <Compile Include="RabbitMQ.Client\Consts\ExchangeModes.cs" />
+    <Compile Include="RabbitMQ.Client\MessageQueue`1.cs" />
+    <Compile Include="RabbitMQ.Client\MessageQueue.cs" />
+    <Compile Include="RabbitMQ.Client\RemoteProcedure`2.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMessageQueue.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IRemoteProcedure`2.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IRemoteProcedure.cs" />
+    <Compile Include="RabbitMQ.Client\Message.cs" />
+    <Compile Include="RabbitMQ.Client\MessageConsumer`1.cs" />
+    <Compile Include="RabbitMQ.Client\MessageConsumer.cs" />
+    <Compile Include="RabbitMQ.Client\MessageProducer`1.cs" />
+    <Compile Include="RabbitMQ.Client\MessageProducer.cs" />
+    <Compile Include="RabbitMQ.Client\Message`1.cs" />
+    <Compile Include="RabbitMQ.Client\MqClient.cs" />
+    <Compile Include="RabbitMQ.Client\RemoteProcedure.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMessage.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMessageConsumer.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMessageConsumer`1.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMessageProducer.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMessageProducer`1.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMessageQueue`1.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMessage`1.cs" />
+    <Compile Include="RabbitMQ.Client\Roles\IMqClient.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
