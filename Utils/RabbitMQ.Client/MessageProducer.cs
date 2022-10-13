@@ -17,10 +17,12 @@ namespace RabbitMQ.Client
         public const string FailedFolder = "publish_failed";
 
         private readonly List<IMessage> _msgList;
-        private readonly Dictionary<ulong, int> _retryMap;
+        private readonly Dictionary<string, int> _retryMap;
         private string _replyTo;
 
         public event EventHandler Disposed;
+        public event Action<string> PublishSuccess;
+        public event Action<string> PublishFailed;
 
         public IMqClient Client { get; }
         public IConnection Connection { get; }
@@ -37,7 +39,7 @@ namespace RabbitMQ.Client
         public MessageProducer(IMqClient client, string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
         {
             _msgList = new List<IMessage>();
-            _retryMap = new Dictionary<ulong, int>();
+            _retryMap = new Dictionary<string, int>();
 
             Client = client;
             RoutingKey = routingKey;
@@ -85,6 +87,11 @@ namespace RabbitMQ.Client
             return this;
         }
 
+        public void WaitForConfirmsOrDie(TimeSpan timeout)
+        {
+            Channel.WaitForConfirmsOrDie(timeout);
+        }
+
         /// <summary>
         /// 发布成功
         /// </summary>
@@ -92,9 +99,26 @@ namespace RabbitMQ.Client
         /// <param name="e"></param>
         private void Channel_BasicAcks(object sender, Events.BasicAckEventArgs e)
         {
-            lock (_msgList)
+            if (e.Multiple)
             {
-                _msgList.RemoveAll(x => x.DeliveryTag == e.DeliveryTag);
+                Acks(x => x.DeliveryTag <= e.DeliveryTag);
+            }
+            else
+            {
+                Acks(x => x.DeliveryTag == e.DeliveryTag);
+            }
+        }
+
+        private void Acks(Func<IMessage, bool> predicate)
+        {
+            var msgs = _msgList.Where(predicate).ToList();
+            foreach (var msg in msgs)
+            {
+                lock (_msgList)
+                {
+                    _msgList.Remove(msg); // 从列表中删除
+                }
+                PublishSuccess?.Invoke(msg.CorrelationId);
             }
         }
 
@@ -106,24 +130,37 @@ namespace RabbitMQ.Client
         private void Channel_BasicNacks(object sender, Events.BasicNackEventArgs e)
         {
             Trace.TraceError($"Publish failed;\r\nDeliveryTag:{e.DeliveryTag};\r\nMultiple:{e.Multiple};");
-            IMessage message = _msgList.FirstOrDefault(x => x.DeliveryTag == e.DeliveryTag);
-            if (message != null)
+            if (e.Multiple)
             {
-                if (!_retryMap.ContainsKey(e.DeliveryTag)) _retryMap[e.DeliveryTag] = 0;
-                if (_retryMap[e.DeliveryTag] < MaxRetryCount) // 最大重试次数内 
+                Nacks(x => x.DeliveryTag <= e.DeliveryTag);
+            }
+            else
+            {
+                Nacks(x => x.DeliveryTag == e.DeliveryTag);
+            }
+        }
+
+        private void Nacks(Func<IMessage, bool> predicate)
+        {
+            var msgs = _msgList.Where(predicate).ToList();
+            foreach (var msg in msgs)
+            {
+                lock (_msgList)
+                {
+                    _msgList.Remove(msg); // 从列表中删除
+                }
+                if (!_retryMap.ContainsKey(msg.CorrelationId)) _retryMap[msg.CorrelationId] = 0;
+                if (_retryMap[msg.CorrelationId] < MaxRetryCount) // 最大重试次数内 
                 {
                     Trace.TraceInformation("Retring...");
-                    Publish(message); // 重新发布
-                    _retryMap[e.DeliveryTag]++;
+                    Publish(msg); // 重新发布
+                    _retryMap[msg.CorrelationId]++;
                 }
                 else // 超过最大重试次数
                 {
                     Trace.TraceInformation("Backup...");
-                    message.Backup(BackupPath); // 备份到本地
-                    lock (_msgList)
-                    {
-                        _msgList.Remove(message); // 从列表中删除
-                    }
+                    msg.Backup(BackupPath); // 备份到本地
+                    PublishFailed?.Invoke(msg.CorrelationId);
                 }
             }
         }

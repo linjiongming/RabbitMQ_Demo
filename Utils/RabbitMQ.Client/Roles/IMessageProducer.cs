@@ -9,6 +9,8 @@ namespace RabbitMQ.Client
     public interface IMessageProducer : IDisposable
     {
         event EventHandler Disposed;
+        event Action<string> PublishSuccess;
+        event Action<string> PublishFailed;
 
         /// <summary>
         /// 客户端
@@ -60,6 +62,12 @@ namespace RabbitMQ.Client
         /// <param name="callback">回调函数</param>
         /// <param name="replyRoutingKey">回发路由键 (默认: r.routingKey)</param>
         IMessageProducer ReplyTo(Func<IMessage, object> callback, string replyRoutingKey = null);
+
+        /// <summary>
+        /// 等待确认
+        /// </summary>
+        /// <param name="timeout">最大等待时长</param>
+        void WaitForConfirmsOrDie(TimeSpan timeout);
     }
 }
 
