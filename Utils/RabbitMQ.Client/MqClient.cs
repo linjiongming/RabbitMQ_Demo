@@ -121,9 +121,11 @@ namespace RabbitMQ.Client
             IDictionary<string, object> args = new Dictionary<string, object>();
             {
                 if (!string.IsNullOrWhiteSpace(queueType))
-                    args.Add(ArgumentKeys.QueueType, queueType);
+                    args[ArgumentKeys.QueueType] = queueType;
                 if (ttl > 0)
-                    args.Add(ArgumentKeys.TimeToLive, ttl);
+                    args[ArgumentKeys.TimeToLive] = ttl;
+                if (exchangeMode == ExchangeModes.DLX)
+                    args[ArgumentKeys.DeadLetterExchange] = ExchangeFailed;         // 指定死信交换机，用于将 Noraml 队列中失败的消息投递给 Failed 交换机
             }
 
             channel.ExchangeDeclare(Exchange, ExchangeType, Durable, false, null);
@@ -134,8 +136,6 @@ namespace RabbitMQ.Client
             {
                 string queueRetry = $"{routingKey}.retry";
                 string queueFailed = $"{routingKey}.failed";
-
-                args[ArgumentKeys.DeadLetterExchange] = ExchangeFailed;         // 指定死信交换机，用于将 Noraml 队列中失败的消息投递给 Failed 交换机
 
                 IDictionary<string, object> retryArgs = new Dictionary<string, object>();
                 {
