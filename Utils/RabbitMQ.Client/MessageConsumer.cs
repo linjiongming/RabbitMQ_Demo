@@ -73,6 +73,7 @@ namespace RabbitMQ.Client
                     }
                     else
                     {
+                        if (reply == null) return;
                         success = reply is bool result ? result : true;
                     }
                 }
