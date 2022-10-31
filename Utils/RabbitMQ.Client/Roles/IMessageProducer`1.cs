@@ -9,20 +9,23 @@ namespace RabbitMQ.Client
     public interface IMessageProducer<T> : IMessageProducer
     {
         /// <summary>
+        /// 绑定队列
+        /// </summary>
+        /// <param name="routingKey">路由键</param>
+        /// <param name="exchangeMode">交换模式</param>
+        /// <param name="queueType">队列类型</param>
+        /// <param name="ttl">最大存活时长</param>
+        /// <returns></returns>
+        new IMessageProducer<T> Bind(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
+
+
+        /// <summary>
         /// 发布
         /// </summary>
         /// <param name="message">消息</param>
         /// <param name="correlationId">相关ID</param>
         /// <returns>消息实体</returns>
         IMessage<T> Publish(T message, string correlationId = null);
-
-        /// <summary>
-        /// 回发
-        /// </summary>
-        /// <typeparam name="TReply">回发消息类型</typeparam>
-        /// <param name="callback">回调函数</param>
-        /// <param name="replyRoutingKey">回发路由键 (默认: r.routingKey)</param>
-        IMessageProducer<T> ReplyTo<TReply>(Func<IMessage<TReply>, bool> callback, string replyRoutingKey = null);
     }
 }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading.Tasks;
 
@@ -17,19 +18,14 @@ namespace RabbitMQ.Client
         IMqClient Client { get; }
 
         /// <summary>
-        /// 路由键
+        /// 绑定队列
         /// </summary>
-        string RoutingKey { get; }
-
-        /// <summary>
-        /// 队列类型
-        /// </summary>
-        string QueueType { get; }
-
-        /// <summary>
-        /// 消息存活时长
-        /// </summary>
-        uint Ttl { get; }
+        /// <param name="routingKey">路由键</param>
+        /// <param name="exchangeMode">交换模式</param>
+        /// <param name="queueType">队列类型</param>
+        /// <param name="ttl">最大存活时长</param>
+        /// <returns></returns>
+        IRemoteProcedure Bind(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
 
         /// <summary>
         /// 同步调用

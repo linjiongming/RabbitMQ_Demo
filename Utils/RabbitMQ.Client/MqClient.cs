@@ -74,34 +74,47 @@ namespace RabbitMQ.Client
             return connection;
         }
 
-        public IMessageProducer CreateProducer(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        public bool TestConnection()
         {
-            return new MessageProducer(this, routingKey, exchangeMode, queueType, ttl);
+            try
+            {
+                using (CreateConnection()) { }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        public IMessageProducer<T> CreateProducer<T>(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        public IMessageProducer CreateProducer()
         {
-            return new MessageProducer<T>(this, routingKey, exchangeMode, queueType, ttl);
+            return new MessageProducer(this);
         }
 
-        public IMessageConsumer CreateConsumer(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        public IMessageProducer<T> CreateProducer<T>()
         {
-            return new MessageConsumer(this, routingKey, exchangeMode, queueType, ttl);
+            return new MessageProducer<T>(this);
         }
 
-        public IMessageConsumer<T> CreateConsumer<T>(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        public IMessageConsumer CreateConsumer()
         {
-            return new MessageConsumer<T>(this, routingKey, exchangeMode, queueType, ttl);
+            return new MessageConsumer(this);
         }
 
-        public IRemoteProcedure CreateRemoteProcedure(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        public IMessageConsumer<T> CreateConsumer<T>()
         {
-            return new RemoteProcedure(this, routingKey, exchangeMode, queueType, ttl);
+            return new MessageConsumer<T>(this);
         }
 
-        public IRemoteProcedure<TSource, TResult> CreateRemoteProcedure<TSource, TResult>(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        public IRemoteProcedure CreateRemoteProcedure()
         {
-            return new RemoteProcedure<TSource, TResult>(this, routingKey, exchangeMode, queueType, ttl);
+            return new RemoteProcedure(this);
+        }
+
+        public IRemoteProcedure<TSource, TResult> CreateRemoteProcedure<TSource, TResult>()
+        {
+            return new RemoteProcedure<TSource, TResult>(this);
         }
 
         public IMessageQueue GetMessageQueue(string queue, string queueType = null, uint ttl = 0)
@@ -114,7 +127,7 @@ namespace RabbitMQ.Client
             return new MessageQueue<T>(this, queue, queueType, ttl);
         }
 
-        public void SetRoute(IModel channel, string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        public IRouteBinding SetRoute(IModel channel, string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
         {
             string queue = $"{routingKey}";
 
@@ -160,6 +173,9 @@ namespace RabbitMQ.Client
                 channel.QueueDeclare(queueFailed, Durable, false, false, failedArgs);
                 channel.QueueBind(queueFailed, ExchangeFailed, routingKey);
             }
+
+            return new RouteBinding(channel, routingKey, exchangeMode, queueType, ttl);
         }
+
     }
 }

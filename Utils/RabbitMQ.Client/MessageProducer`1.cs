@@ -13,9 +13,15 @@ namespace RabbitMQ.Client
 {
     public class MessageProducer<T> : MessageProducer, IMessageProducer<T>
     {
-        public MessageProducer(IMqClient client, string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
-            : base(client, routingKey, exchangeMode, queueType, ttl)
+        public MessageProducer(IMqClient client)
+            : base(client)
         {
+        }
+
+        public new IMessageProducer<T> Bind(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        {
+            base.Bind(routingKey, exchangeMode, queueType, ttl);
+            return this;
         }
 
         public IMessage<T> Publish(T value, string correlationId = null)
@@ -23,12 +29,6 @@ namespace RabbitMQ.Client
             IMessage<T> message = new Message<T>(value, correlationId);
             base.Publish(message);
             return message;
-        }
-
-        public IMessageProducer<T> ReplyTo<TReply>(Func<IMessage<TReply>, bool> callback, string replyTo = null)
-        {
-            base.ReplyTo(x => callback(x.Cast<TReply>()), replyTo);
-            return this;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client.Events;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace RabbitMQ.Client
@@ -27,24 +28,19 @@ namespace RabbitMQ.Client
         IModel Channel { get; }
 
         /// <summary>
-        /// 路由键
+        /// 绑定信息
         /// </summary>
-        string RoutingKey { get; }
+        List<IRouteBinding> Bindings { get; }
 
         /// <summary>
-        /// 交换模式
+        /// 绑定队列
         /// </summary>
-        ExchangeModes ExchangeMode { get; }
-
-        /// <summary>
-        /// 队列类型
-        /// </summary>
-        string QueueType { get; }
-
-        /// <summary>
-        /// 消息存活时间
-        /// </summary>
-        uint Ttl { get; }
+        /// <param name="routingKey">路由键</param>
+        /// <param name="exchangeMode">交换模式</param>
+        /// <param name="queueType">队列类型</param>
+        /// <param name="ttl">最大存活时长</param>
+        /// <returns></returns>
+        IMessageConsumer Bind(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
 
         /// <summary>
         /// 订阅

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,6 +16,7 @@ namespace RabbitMQ.Client
         public IConnection Connection { get; }
         public IModel Channel { get; }
         public string Queue { get; }
+        public IRouteBinding Binding { get; }
 
         public MessageQueue(IMqClient client, string queue, string queueType = null, uint ttl = 0)
         {
@@ -22,8 +24,8 @@ namespace RabbitMQ.Client
             Connection = Client.CreateConnection();
             Channel = Connection.CreateModel();
             Queue = queue;
-            Client.SetRoute(Channel, Queue, queueType: queueType, ttl: ttl);
             if (Client.Fairly) Channel.BasicQos(0, 1, false);
+            Binding = Client.SetRoute(Channel, queue, queueType: queueType, ttl: ttl);
         }
 
         public IEnumerator<IMessage> GetEnumerator() => _enumerator ?? (_enumerator = new MessageEnumerator(Channel, Queue));
@@ -36,6 +38,7 @@ namespace RabbitMQ.Client
         public void Dispose()
         {
             Channel?.Dispose();
+            Binding?.Dispose();
             Connection?.Dispose();
         }
 
@@ -45,7 +48,7 @@ namespace RabbitMQ.Client
             public string Queue { get; }
             public int Index { get; private set; }
             public BasicGetResult CurrentResult { get; private set; }
-            public IList<IMessage> Messages { get; }
+            public List<IMessage> Messages { get; }
             public IMessage Current => Messages[Index];
             object IEnumerator.Current => Current;
 

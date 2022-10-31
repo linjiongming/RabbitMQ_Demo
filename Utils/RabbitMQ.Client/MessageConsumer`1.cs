@@ -13,9 +13,15 @@ namespace RabbitMQ.Client
 {
     public class MessageConsumer<T> : MessageConsumer, IMessageConsumer<T>
     {
-        public MessageConsumer(IMqClient client, string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
-            : base(client, routingKey, exchangeMode, queueType, ttl)
+        public MessageConsumer(IMqClient client)
+            : base(client)
         {
+        }
+
+        public new IMessageConsumer<T> Bind(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        {
+            base.Bind(routingKey, exchangeMode, queueType, ttl);
+            return this;
         }
 
         public void Subscribe(Action<IMessage<T>> handler)

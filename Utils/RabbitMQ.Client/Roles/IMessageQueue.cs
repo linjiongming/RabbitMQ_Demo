@@ -28,5 +28,10 @@ namespace RabbitMQ.Client
         /// 队列
         /// </summary>
         string Queue { get; }
+
+        /// <summary>
+        /// 路由绑定信息
+        /// </summary>
+        IRouteBinding Binding { get; }
     }
 }

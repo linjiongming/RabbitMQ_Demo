@@ -1,4 +1,4 @@
-﻿namespace RabbitMQ.Client
+namespace RabbitMQ.Client
 {
     /// <summary>
     /// 队列类型

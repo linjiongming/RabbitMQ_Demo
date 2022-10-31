@@ -1,4 +1,4 @@
-﻿namespace RabbitMQ.Client
+namespace RabbitMQ.Client
 {
     /// <summary>
     /// 交换机类型

@@ -11,33 +11,43 @@ namespace RabbitMQ.Client
 {
     public class RemoteProcedure : IRemoteProcedure
     {
-        protected readonly List<IMessage> _resultList;
-        protected readonly Dictionary<string, AutoResetEvent> _waitMap;
+        private readonly List<IMessage> _resultList;
+        private readonly Dictionary<string, AutoResetEvent> _waitMap;
 
         public event EventHandler Disposed;
 
         public IMqClient Client { get; }
 
-        public string RoutingKey { get; }
-        public ExchangeModes ExchangeMode { get; }
-        public string QueueType { get; }
-        public uint Ttl { get; }
         private IMessageProducer Producer { get; set; }
         private IMessageConsumer Consumer { get; set; }
+        private IMessageConsumer ReplyConsumer { get; set; }
 
-        public RemoteProcedure(IMqClient client, string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        public RemoteProcedure(IMqClient client)
         {
             _resultList = new List<IMessage>();
             _waitMap = new Dictionary<string, AutoResetEvent>();
 
             Client = client;
-            RoutingKey = routingKey;
-            ExchangeMode = exchangeMode;
-            QueueType = queueType;
-            Ttl = ttl;
+            Producer = Client.CreateProducer();
+            Consumer = client.CreateConsumer();
+            ReplyConsumer = client.CreateConsumer();
         }
 
-        protected virtual bool Reply(IMessage result)
+        public IRemoteProcedure Bind(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0)
+        {
+            if (!Producer.Bindings.Any(x => x.RoutingKey == routingKey))
+            {
+                Producer.Bind(routingKey, exchangeMode, queueType, ttl);
+                Consumer.Bind(routingKey, exchangeMode, queueType, ttl);
+                string replyRoutingKey = $"r.{routingKey}";
+                Producer.ReplyTo(replyRoutingKey);
+                ReplyConsumer.Bind(replyRoutingKey, exchangeMode, queueType, ttl);
+                ReplyConsumer.Subscribe(x => Reply(x));
+            }
+            return this;
+        }
+
+        private bool Reply(IMessage result)
         {
             if (_waitMap.ContainsKey(result.CorrelationId))
             {
@@ -51,14 +61,8 @@ namespace RabbitMQ.Client
             return false;
         }
 
-        public virtual string Call(string content, int timeout = 30 * 1000)
+        public string Call(string content, int timeout = 30 * 1000)
         {
-            if (Producer == null)
-            {
-                Producer = new MessageProducer(Client, RoutingKey, ExchangeMode, QueueType, Ttl);
-                Disposed += delegate { Producer?.Dispose(); };
-                Producer.ReplyTo(x => Reply(x));
-            }
             IMessage message = Producer.Publish(content);
             lock (_waitMap)
             {
@@ -84,7 +88,7 @@ namespace RabbitMQ.Client
             }
             else
             {
-                Trace.TraceError($"RemoteProcedure[{RoutingKey}] answer timeout.");
+                Trace.TraceError($"RemoteProcedure[{string.Join(",", Producer.Bindings.Select(x => x.RoutingKey))}] answer timeout.");
             }
             return null;
         }
@@ -96,11 +100,6 @@ namespace RabbitMQ.Client
 
         public void Answer(Func<IMessage, string> handler)
         {
-            if (Consumer == null)
-            {
-                Consumer = new MessageConsumer(Client, RoutingKey, ExchangeMode, QueueType, Ttl);
-                Disposed += delegate { Consumer?.Dispose(); };
-            }
             Consumer.Subscribe(handler);
         }
 
@@ -108,6 +107,9 @@ namespace RabbitMQ.Client
         {
             if (disposing)
             {
+                Producer.Dispose();
+                ReplyConsumer.Dispose();
+                Consumer.Dispose();
                 Disposed?.Invoke(this, EventArgs.Empty);
             }
         }

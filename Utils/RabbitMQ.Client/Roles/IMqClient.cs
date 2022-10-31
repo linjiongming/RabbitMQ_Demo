@@ -65,68 +65,50 @@ namespace RabbitMQ.Client
         IConnection CreateConnection();
 
         /// <summary>
+        /// 测试连接
+        /// </summary>
+        /// <returns></returns>
+        bool TestConnection();
+
+        /// <summary>
         /// 创建生产者
         /// </summary>
-        /// <param name="routingKey">路由键</param>
-        /// <param name="exchangeMode">交换模式</param>
-        /// <param name="queueType">队列类型</param>
-        /// <param name="ttl">消息存活时长</param>
         /// <returns></returns>
-        IMessageProducer CreateProducer(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
+        IMessageProducer CreateProducer();
 
         /// <summary>
         /// 创建生产者
         /// </summary>
         /// <typeparam name="T">消息类型</typeparam>
-        /// <param name="routingKey">路由键</param>
-        /// <param name="exchangeMode">交换模式</param>
-        /// <param name="queueType">队列类型</param>
-        /// <param name="ttl">消息存活时长</param>
         /// <returns></returns>
-        IMessageProducer<T> CreateProducer<T>(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
+        IMessageProducer<T> CreateProducer<T>();
 
         /// <summary>
         /// 创建消费者
         /// </summary>
-        /// <param name="routingKey">路由键</param>
-        /// <param name="exchangeMode">交换模式</param>
-        /// <param name="queueType">队列类型</param>
-        /// <param name="ttl">消息存活时长</param>
         /// <returns></returns>
-        IMessageConsumer CreateConsumer(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
+        IMessageConsumer CreateConsumer();
 
         /// <summary>
         /// 创建消费者
         /// </summary>
         /// <typeparam name="T">消息类型</typeparam>
-        /// <param name="routingKey">路由键</param>
-        /// <param name="exchangeMode">交换模式</param>
-        /// <param name="queueType">队列类型</param>
-        /// <param name="ttl">消息存活时长</param>
         /// <returns></returns>
-        IMessageConsumer<T> CreateConsumer<T>(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
+        IMessageConsumer<T> CreateConsumer<T>();
 
         /// <summary>
         /// 创建远程过程
         /// </summary>
-        /// <param name="routingKey">路由键</param>
-        /// <param name="exchangeMode">交换模式</param>
-        /// <param name="queueType">队列类型</param>
-        /// <param name="ttl">消息存活时长</param>
         /// <returns></returns>
-        IRemoteProcedure CreateRemoteProcedure(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
+        IRemoteProcedure CreateRemoteProcedure();
 
         /// <summary>
         /// 创建远程过程
         /// </summary>
         /// <typeparam name="TSource">传入类型</typeparam>
         /// <typeparam name="TResult">传出类型</typeparam>
-        /// <param name="routingKey">路由键</param>
-        /// <param name="exchangeMode">交换模式</param>
-        /// <param name="queueType">队列类型</param>
-        /// <param name="ttl">消息存活时长</param>
         /// <returns></returns>
-        IRemoteProcedure<TSource, TResult> CreateRemoteProcedure<TSource, TResult>(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
+        IRemoteProcedure<TSource, TResult> CreateRemoteProcedure<TSource, TResult>();
 
         /// <summary>
         /// 获取消息队列（当前全部消息枚举列表）
@@ -151,7 +133,8 @@ namespace RabbitMQ.Client
         /// <param name="exchangeMode">交换模式</param>
         /// <param name="queueType">队列类型</param>
         /// <param name="ttl">消息存活时长</param>
-        void SetRoute(IModel channel, string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
+        /// <returns>路由绑定信息</returns>
+        IRouteBinding SetRoute(IModel channel, string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
 
     }
 }

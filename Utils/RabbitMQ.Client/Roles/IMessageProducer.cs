@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace RabbitMQ.Client
@@ -28,24 +29,19 @@ namespace RabbitMQ.Client
         IModel Channel { get; }
 
         /// <summary>
-        /// 路由键
+        /// 绑定信息
         /// </summary>
-        string RoutingKey { get; }
+        List<IRouteBinding> Bindings { get; }
 
         /// <summary>
-        /// 交换模式
+        /// 绑定队列
         /// </summary>
-        ExchangeModes ExchangeMode { get; }
-
-        /// <summary>
-        /// 队列类型
-        /// </summary>
-        string QueueType { get; }
-
-        /// <summary>
-        /// 消息存活时间
-        /// </summary>
-        uint Ttl { get; }
+        /// <param name="routingKey">路由键</param>
+        /// <param name="exchangeMode">交换模式</param>
+        /// <param name="queueType">队列类型</param>
+        /// <param name="ttl">最大存活时长</param>
+        /// <returns></returns>
+        IMessageProducer Bind(string routingKey, ExchangeModes exchangeMode = ExchangeModes.Normal, string queueType = null, uint ttl = 0);
 
         /// <summary>
         /// 发布
@@ -58,10 +54,8 @@ namespace RabbitMQ.Client
         /// <summary>
         /// 回发
         /// </summary>
-        /// <typeparam name="TReply">回发消息类型</typeparam>
-        /// <param name="callback">回调函数</param>
-        /// <param name="replyRoutingKey">回发路由键 (默认: r.routingKey)</param>
-        IMessageProducer ReplyTo(Func<IMessage, object> callback, string replyRoutingKey = null);
+        /// <param name="replyRoutingKey">回发路由键</param>
+        IMessageProducer ReplyTo(string replyRoutingKey);
 
         /// <summary>
         /// 等待确认
